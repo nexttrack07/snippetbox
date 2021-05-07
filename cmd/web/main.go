@@ -8,13 +8,16 @@ import (
 	"net/http"
 	"nexttrack07/snippetbox/pkg/models/mysql"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golangcollege/sessions"
 )
 
 type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
+	session       *sessions.Session
 	snippets      *mysql.SnippetModel
 	templateCache map[string]*template.Template
 }
@@ -22,6 +25,7 @@ type application struct {
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL DSN")
+	secret := flag.String("secret", "h9Ndh+pPbnzHbS*+9Pk8qGWhTzbsa@as", "Secret key")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -38,9 +42,13 @@ func main() {
 		errorLog.Println("unable to create template cache ", err)
 	}
 
+	session := sessions.New([]byte(*secret))
+	session.Lifetime = 12 * time.Hour
+
 	app := &application{
 		errorLog:      errorLog,
 		infoLog:       infoLog,
+		session:       session,
 		snippets:      &mysql.SnippetModel{DB: db},
 		templateCache: templateCache,
 	}
