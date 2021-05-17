@@ -25,6 +25,7 @@ func (app *application) notFound(w http.ResponseWriter) {
 	app.clientError(w, http.StatusNotFound)
 }
 
+// default data that is added to every template file
 func (app *application) addDefaultData(td *templateData, r *http.Request) *templateData {
 	data := td
 	if data == nil {
